@@ -10,7 +10,6 @@ const transports = [
     }),
 ];
 
-// Only use file transports when not running on Vercel (read-only filesystem)
 if (!process.env.VERCEL) {
     transports.push(
         new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
