@@ -1,5 +1,23 @@
 const winston = require('winston');
 
+/** @type {winston.transport[]} */
+const transports = [
+    new winston.transports.Console({
+        format: winston.format.combine(
+            winston.format.colorize(),
+            winston.format.simple()
+        ),
+    }),
+];
+
+// Only use file transports when not running on Vercel (read-only filesystem)
+if (!process.env.VERCEL) {
+    transports.push(
+        new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
+        new winston.transports.File({ filename: 'logs/combined.log' })
+    );
+}
+
 const logger = winston.createLogger({
     level: process.env.NODE_ENV === 'production' ? 'warn' : 'debug',
     format: winston.format.combine(
@@ -11,16 +29,7 @@ const logger = winston.createLogger({
                 : `${timestamp} [${level.toUpperCase()}]: ${message}`;
         })
     ),
-    transports: [
-        new winston.transports.Console({
-            format: winston.format.combine(
-                winston.format.colorize(),
-                winston.format.simple()
-            ),
-        }),
-        new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
-        new winston.transports.File({ filename: 'logs/combined.log' }),
-    ],
+    transports,
 });
 
 module.exports = logger;
